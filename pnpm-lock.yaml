@@ -19,7 +19,7 @@ importers:
         version: 5.9.2
 
   apps/http-backend:
-    dependencies:
+    devDependencies:
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config
