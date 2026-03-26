@@ -2,7 +2,7 @@
   "name": "@repo/common",
   "version": "1.0.0",
   "exports": {
-    "./schema": "./src/schema.ts"
+    ".": "./src/schema.ts"
   },
   "description": "",
   "main": "index.js",
@@ -15,7 +15,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "dependencies": {
     "zod": "^4.3.6"
   }
