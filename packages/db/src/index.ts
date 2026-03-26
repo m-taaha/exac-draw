@@ -1,6 +1,5 @@
-// packages/db/src/index.ts
-export { PrismaClient } from "./generated/prisma";
-import { PrismaClient } from "./generated/prisma";
+import { PrismaClient } from "./generated/prisma/index.js";
+export { PrismaClient } from "./generated/prisma/index.js";
 
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
 
