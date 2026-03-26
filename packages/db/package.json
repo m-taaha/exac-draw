@@ -1,5 +1,5 @@
 {
-  "name": "db",
+  "name": "@repo/db",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -14,7 +14,7 @@
     "@types/node": "^22.15.3"
   },
   "exports": {
-    ".": "./src/index.ts"
+    "./db": "./src/index.ts"
   },
   "keywords": [],
   "author": "",
