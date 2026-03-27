@@ -4,6 +4,11 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@repo/db";
 import jwt from "jsonwebtoken";
 
+const JWT_SECRET = process.env.JWT_SECRET_KEY;
+if(!JWT_SECRET) {
+    throw new Error("JWT_SECRET_KEY is not defined")
+}
+
 
 // interface SignupInput {
 //     name: string;
@@ -19,7 +24,7 @@ import jwt from "jsonwebtoken";
 
 
 //signUP
-export const userSingUp = async (req: Request, res: Response) => {
+export const userSignUp = async (req: Request, res: Response) => {
     
     try{
 
@@ -35,7 +40,7 @@ export const userSingUp = async (req: Request, res: Response) => {
 
       const {name, email, password} = result.data;
 
-    //   extinguish user
+    //   check if user already exists
       const existingUser = await prisma.user.findUnique({
         where: {email}
       });
@@ -76,7 +81,7 @@ export const userSingUp = async (req: Request, res: Response) => {
 
 }
 
-export const userSingIn = async (req: Request, res: Response) => {
+export const userSingnIn = async (req: Request, res: Response) => {
    try{
      const result = SigninSchema.safeParse(req.body);
 
@@ -96,8 +101,8 @@ export const userSingIn = async (req: Request, res: Response) => {
      })
 
      if(!user){
-        return res.status(404).json({
-            message: "User does not exist"
+        return res.status(401).json({
+            message: "Invalid credentials"
         })
      }
 
@@ -113,14 +118,15 @@ export const userSingIn = async (req: Request, res: Response) => {
     // sign jwt
     const token = jwt.sign(
         {userId: user.id},
-        process.env.JWT_SECRET_KEY!,
+        JWT_SECRET,
         {expiresIn: "7d"}
     )
 
     res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 7 * 24 * 60 * 60 * 1000
     });
 
     return res.status(200).json({
