@@ -6,8 +6,8 @@ import { userSingIn, userSingUP } from "../controller/controllers.js";
 const userRouter : Router = Router();
 
 
-userRouter.post("/signUp", userSingUP);
-userRouter.post("/sign", userSingIn);
+userRouter.post("/signup", userSingUP);
+userRouter.post("/signIn", userSingIn);
 
 
 export default userRouter;
