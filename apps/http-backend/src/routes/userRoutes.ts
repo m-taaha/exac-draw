@@ -1,12 +1,12 @@
 import { Router } from "express";
-import { userSingIn, userSingUP } from "../controller/controllers.js";
+import { userSingIn, userSingUp } from "../controller/controllers.js";
 
 
 
 const userRouter : Router = Router();
 
 
-userRouter.post("/signup", userSingUP);
+userRouter.post("/signup", userSingUp);
 userRouter.post("/signIn", userSingIn);
 
 
