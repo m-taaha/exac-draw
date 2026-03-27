@@ -2,13 +2,19 @@ import { Request, Response } from "express"
 import { SigninSchema, SignupSchema } from "@repo/common";
 import bcrypt from "bcryptjs";
 import { prisma } from "@repo/db";
+import jwt from "jsonwebtoken";
 
 
-interface SignupInput {
-    name: string;
-    email: string;
-    password: string
-}
+// interface SignupInput {
+//     name: string;
+//     email: string;
+//     password: string
+// }
+
+// interface SigninInput {
+//     email: string;
+//     password: string;
+// }
 
 
 
@@ -70,6 +76,67 @@ export const userSingUp = async (req: Request, res: Response) => {
 
 }
 
-export const userSingIn = () => {
-    
+export const userSingIn = async (req: Request, res: Response) => {
+   try{
+     const result = SigninSchema.safeParse(req.body);
+
+     if(!result.success){
+        return res.status(400).json({
+            message: "Invalid Input",
+            errors: result.error.issues
+        })
+     }
+
+    const { email, password } = result.data;
+
+     const user = await prisma.user.findUnique({
+        where: {
+            email
+        }
+     })
+
+     if(!user){
+        return res.status(404).json({
+            message: "User does not exist"
+        })
+     }
+
+    //  compare password
+    const isValid = await bcrypt.compare(password, user.password);
+    if(!isValid) {
+        return res.status(401).json({
+            message: "Invalid credentials"
+        })
+    }
+
+
+    // sign jwt
+    const token = jwt.sign(
+        {userId: user.id},
+        process.env.JWT_SECRET_KEY!,
+        {expiresIn: "7d"}
+    )
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+    });
+
+    return res.status(200).json({
+        message: "User Signed in successfully",
+        user: {
+            name: user.name,
+            email: user.email
+        }
+    })
+
+     
+
+   } catch(error) {
+       console.log("Sign in error", error)
+    res.status(500).json({
+        message: "Internal Server Error"
+    })
+   }
 }
