@@ -11,6 +11,7 @@
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
+    "@types/cookie": "^1.0.0",
     "@types/ws": "^8.18.1",
     "nodemon": "^3.1.14"
   },
@@ -19,8 +20,9 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
-    "ws": "^8.20.0",
     "@repo/common": "workspace:*",
-    "@repo/db": "workspace:*"
+    "@repo/db": "workspace:*",
+    "cookie": "^1.1.1",
+    "ws": "^8.20.0"
   }
 }
