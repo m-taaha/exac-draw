@@ -12,6 +12,7 @@
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
     "@types/cookie": "^1.0.0",
+    "@types/dotenv": "^8.2.3",
     "@types/ws": "^8.18.1",
     "nodemon": "^3.1.14"
   },
@@ -24,6 +25,7 @@
     "@repo/db": "workspace:*",
     "@types/jsonwebtoken": "^9.0.10",
     "cookie": "^1.1.1",
+    "dotenv": "^17.3.1",
     "jsonwebtoken": "^9.0.3",
     "ws": "^8.20.0"
   }

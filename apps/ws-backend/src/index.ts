@@ -2,6 +2,9 @@ import { WebSocketServer, WebSocket } from "ws";
 import {IncomingMessage} from "http";
 import cookie from "cookie";
 import jwt from "jsonwebtoken";
+import { configDotenv } from "dotenv";
+
+configDotenv();
 
 const wss = new WebSocketServer({port: 8080});
 

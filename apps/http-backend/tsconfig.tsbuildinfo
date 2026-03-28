@@ -1,1 +1,1 @@
-{"root":["./src/index.ts","./src/controller/controllers.ts","./src/middlewares/auth.ts","./src/routes/userroutes.ts"],"errors":true,"version":"5.9.2"}
+{"root":["./src/index.ts","./src/controllers/roomcontroller.ts","./src/controllers/usercontroller.ts","./src/middlewares/auth.ts","./src/routes/roomroutes.ts","./src/routes/userroutes.ts","./src/types/express.d.ts"],"version":"5.9.2"}
