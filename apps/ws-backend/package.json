@@ -22,7 +22,9 @@
   "dependencies": {
     "@repo/common": "workspace:*",
     "@repo/db": "workspace:*",
+    "@types/jsonwebtoken": "^9.0.10",
     "cookie": "^1.1.1",
+    "jsonwebtoken": "^9.0.3",
     "ws": "^8.20.0"
   }
 }
