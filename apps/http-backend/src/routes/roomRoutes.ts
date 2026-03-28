@@ -1,5 +1,5 @@
 import {Router} from "express"
-import { createRoom } from "../controllers/roomController.js";
+import { createRoom } from "../controller/roomController.js";
 import { authMiddleware } from "../middlewares/auth.js";
 
 
