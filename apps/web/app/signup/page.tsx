@@ -15,6 +15,7 @@ export default function SignupPage() {
         password: ""
     });
     const [error, setError] = useState("");
+    const [isLoading, setIsLoading] = useState(false)
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setForm(prev => ({
@@ -25,6 +26,8 @@ export default function SignupPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setIsLoading(true);
+        setError("");
 
         try {
             const response = await axios.post("http://localhost:8000/api/v1/user/signup", form);
@@ -38,6 +41,8 @@ export default function SignupPage() {
         
         } catch (error: any) {
             setError(error.response?.data?.message || "Something went wrong")
+        } finally {
+          setIsLoading(false);
         }
     }
 
@@ -108,8 +113,9 @@ export default function SignupPage() {
               <button
                 type="submit"
                 className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-lg py-2.5 transition-colors text-sm"
+                disabled={isLoading}
               >
-                Create account
+                {isLoading ? "Creating account..." : "Create account"}
               </button>
             </form>
           </div>
