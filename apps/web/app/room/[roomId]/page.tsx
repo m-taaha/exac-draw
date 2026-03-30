@@ -241,6 +241,20 @@ export default function RoomPage({params}: {params: Promise<{roomId: string}> })
           >
             Line
           </button>
+
+          <button
+            onClick={async () => {
+              await axios.post(
+                "http://localhost:8000/api/v1/user/signout",
+                {},
+                { withCredentials: true },
+              );
+              window.location.href = "/signin";
+            }}
+            className="text-zinc-400 hover:text-red-400 transition-colors text-sm px-3 py-1.5 rounded-lg hover:bg-zinc-800"
+          >
+            Sign out
+          </button>
         </div>
 
         {/* canvas to draw */}
