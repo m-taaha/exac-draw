@@ -25,6 +25,31 @@ export default function RoomPage({params}: {params: {roomId: string}}) {
     const startX = useRef(0);
     const startY = useRef(0);
 
+    const wsRef = useRef<WebSocket | null>(null);
+    
+    useEffect(() => {
+      // connect with the roomId in query params 
+      const ws = new WebSocket(`ws://localhost:8080?roomId=${roomId}`)
+
+
+      ws.onopen = () => console.log("WS connected");
+      ws.onclose = () => console.log("WS disconnected");
+
+      ws.onmessage = (event) => {
+        const shape = JSON.parse(event.data)
+        shapes.current.push(shape);
+
+        redrawCanvas();
+      }
+
+
+      wsRef.current = ws;
+
+
+      // clean up 
+      return () => ws.close();
+    }, [roomId])
+
 
 
     useEffect(() => {
@@ -38,7 +63,7 @@ export default function RoomPage({params}: {params: {roomId: string}}) {
     }, [])
 
 
-    // mouse handler down -- clicked 
+    //{ mouse handler down -- clicked }
     const handleMouseDown = (e: React.MouseEvent) => {
         isDrawing.current = true;
         startX.current = e.clientX;
@@ -49,22 +74,28 @@ export default function RoomPage({params}: {params: {roomId: string}}) {
 
 
 
-    // mouse up handler - releasing the clicked  button 
+    //{ mouse up handler - releasing the clicked  button }
     const handleMouseUp = (e: React.MouseEvent) => {
         isDrawing.current = false
 
         //save the completed the shapes othewise it will vanish the momemt you to try to draw something else
-             shapes.current.push({
+             const shape = {
                x: startX.current,
                y: startY.current,
                w: e.clientX - startX.current,
                h: e.clientY - startY.current,
                type: tool, 
-             });
+             };
+
+             //save locally
+             shapes.current.push(shape);
+
+             //send via websocket
+             wsRef.current?.send(JSON.stringify(shape));
     }
 
 
-    // mouse move handler or drag - 
+    // {mouse move handler or drag - }
     const handleMouseMove = (e: React.MouseEvent) => {
        if (!isDrawing.current) return; //only draw when the button is clicked
 
@@ -80,32 +111,7 @@ export default function RoomPage({params}: {params: {roomId: string}}) {
 
 
     //    re-draw all saved shapes first 
-    ctx.strokeStyle = "#6366f1"
-    ctx.lineWidth = 2;
-    shapes.current.forEach((shape) => {
-      if (shape.type === "rect") {
-        ctx.strokeRect(shape.x, shape.y, shape.w, shape.h);
-      } else if (shape.type === "circle") {
-        const rx = shape.w / 2;
-        const ry = shape.h / 2;
-        ctx.beginPath();
-        ctx.ellipse(
-          shape.x + rx,
-          shape.y + ry,
-          Math.abs(rx),
-          Math.abs(ry),
-          0,
-          0,
-          Math.PI * 2,
-        );
-        ctx.stroke();
-      } else if (shape.type === "line") {
-        ctx.beginPath();
-        ctx.moveTo(shape.x, shape.y);
-        ctx.lineTo(shape.x + shape.w, shape.y + shape.h);
-        ctx.stroke();
-      }
-    });
+    redrawCanvas();
 
     // draw the shape currently being dragged
     if (tool === "rect") {
@@ -130,6 +136,44 @@ export default function RoomPage({params}: {params: {roomId: string}}) {
       ctx.lineTo(e.clientX, e.clientY);
       ctx.stroke();
     }
+    }
+
+
+    // reussable redraw function
+    const redrawCanvas = () => {
+      const ctx = ctxRef.current;
+      const canvas = canvasRef.current;
+
+      if(!ctx || !canvas) return
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      ctx.strokeStyle = "#6366f1"
+      ctx.lineWidth = 2
+
+        shapes.current.forEach((shape) => {
+          if (shape.type === "rect") {
+            ctx.strokeRect(shape.x, shape.y, shape.w, shape.h);
+          } else if (shape.type === "circle") {
+            const rx = shape.w / 2;
+            const ry = shape.h / 2;
+            ctx.beginPath();
+            ctx.ellipse(
+              shape.x + rx,
+              shape.y + ry,
+              Math.abs(rx),
+              Math.abs(ry),
+              0,
+              0,
+              Math.PI * 2,
+            );
+            ctx.stroke();
+          } else if (shape.type === "line") {
+            ctx.beginPath();
+            ctx.moveTo(shape.x, shape.y);
+            ctx.lineTo(shape.x + shape.w, shape.y + shape.h);
+            ctx.stroke();
+          }
+        });
 
     }
 
