@@ -4,6 +4,7 @@ import { IncomingMessage } from "http";
 import cookie from "cookie";
 import jwt from "jsonwebtoken";
 import { parse } from "url";
+import { prisma } from "@repo/db";
 
 
 
@@ -47,7 +48,22 @@ wss.on("connection", (ws: WebSocket, req: IncomingMessage) => {
 
     console.log("User connected:", userId);
 
-    ws.on("message", (data) => {
+    ws.on("message", async (data) => {
+          try {
+            console.log("Saving shape to DB:", data.toString()); 
+            await prisma.chat.create({
+              data: {
+                roomId: Number(roomId),
+                userId,
+                message: data.toString(),
+              },
+            });
+            console.log("Shape saved successfully"); 
+            
+          } catch (error) {
+            console.error("Failed to save shape:", error); 
+          }
+
       rooms.get(roomId)?.forEach(client => {
         // send the message to everyone in room but not the user itself because he created the message or generated
         if(client !== ws && client.readyState === WebSocket.OPEN) {

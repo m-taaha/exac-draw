@@ -52,3 +52,28 @@ export const createRoom = async (req: Request, res: Response) => {
         })
     }
 }
+
+
+export const getShapes = async (req: Request, res: Response) => {
+   try{
+     const roomId = Number(req.params.roomId);
+
+    const chats = await prisma.chat.findMany({
+        where: {
+            roomId
+        }
+    })
+
+    const shapes = chats.map(
+        chat => JSON.parse(chat.message)
+    )
+
+    res.json({shapes})
+   } catch(error) {
+    console.log("Server Error", error)
+    res.status(500).json({
+        message: "Internal Server Error"
+    })
+   }
+
+}

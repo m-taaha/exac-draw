@@ -1,6 +1,8 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react";
+import axios from "axios";
+import { useEffect, useRef, useState, use } from "react";
+
 
 interface Shapes {
     x: number,
@@ -11,8 +13,8 @@ interface Shapes {
 } 
 
 
-export default function RoomPage({params}: {params: {roomId: string}}) {
-    const roomId = params.roomId;
+export default function RoomPage({params}: {params: Promise<{roomId: string}> }) {
+    const {roomId} = use(params);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const ctxRef = useRef<CanvasRenderingContext2D | null>(null)
 
@@ -27,6 +29,8 @@ export default function RoomPage({params}: {params: {roomId: string}}) {
 
     const wsRef = useRef<WebSocket | null>(null);
     
+
+
     useEffect(() => {
       // connect with the roomId in query params 
       const ws = new WebSocket(`ws://localhost:8080?roomId=${roomId}`)
@@ -61,6 +65,26 @@ export default function RoomPage({params}: {params: {roomId: string}}) {
 
         ctxRef.current = canvas.getContext("2d");
     }, [])
+
+
+    useEffect(() => {
+       const fetchShapes = async () => {
+         try {
+           const res = await axios.get(
+             `http://localhost:8000/api/v1/room/${roomId}/shapes`,
+             { withCredentials: true },
+           );
+
+           shapes.current = res.data.shapes;
+
+           setTimeout(() => redrawCanvas(), 100) //wait canvas to be ready first
+         } catch (error) {
+           console.log("Failed to load shapes", error);
+         }
+       };
+
+       fetchShapes();
+    }, [roomId])
 
 
     //{ mouse handler down -- clicked }
