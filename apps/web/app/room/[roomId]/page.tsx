@@ -25,16 +25,26 @@ export default function RoomPage({
   const [tool, setTool] = useState<"rect" | "circle" | "line" | "pencil">(
     "rect",
   );
-  const currentPoints = useRef<{ x: number; y: number }[]>([]); // ← tracks pencil points
+  const currentPoints = useRef<{ x: number; y: number }[]>([]); 
   const startX = useRef(0);
   const startY = useRef(0);
   const wsRef = useRef<WebSocket | null>(null);
   const [activeUsers, setActiveUsers] = useState<string[]>([]);
 
+  const [wsStatus, setWsStatus] = useState<"connecting" | "connected" | "disconnected">("connecting"); //tracks the ws connection
+  const [isLoadingShapes, setIsLoadingShapes] = useState(true);
+
+
   useEffect(() => {
     const ws = new WebSocket(`ws://localhost:8080?roomId=${roomId}`);
-    ws.onopen = () => console.log("WS connected");
-    ws.onclose = () => console.log("WS disconnected");
+    ws.onopen = () => {
+      console.log("WS connected");
+      setWsStatus("connected");
+    }
+    ws.onclose = () => {
+      console.log("WS disconnected");
+      setWsStatus("disconnected")
+    }
     ws.onmessage = (event) => {
       const msg = JSON.parse(event.data);
       if (msg.kind === "draw") {
@@ -66,6 +76,8 @@ export default function RoomPage({
 
   useEffect(() => {
     const fetchShapes = async () => {
+      setIsLoadingShapes(true);
+
       try {
         const res = await axios.get(
           `http://localhost:8000/api/v1/room/${roomId}/shapes`,
@@ -75,6 +87,8 @@ export default function RoomPage({
         if (ctxRef.current) redrawCanvas();
       } catch (error) {
         console.log("Failed to load shapes", error);
+      } finally {
+        setIsLoadingShapes(false)
       }
     };
     fetchShapes();
@@ -134,7 +148,6 @@ export default function RoomPage({
     ctx.strokeStyle = "#6366f1";
     ctx.lineWidth = 2;
 
-    // ← NEW: pencil draws live path on every mousemove
     if (tool === "pencil") {
       currentPoints.current.push({ x: e.clientX, y: e.clientY });
       const points = currentPoints.current;
@@ -210,6 +223,24 @@ export default function RoomPage({
 
   return (
     <div className="w-screen h-screen bg-[#1a1a2e] overflow-hidden">
+      {/* ws status */}
+      <div
+        className={`absolute top-4 left-4 z-10 text-xs px-2 py-1 rounded-full ${
+          wsStatus === "connected"
+            ? "bg-green-500/20 text-green-400"
+            : wsStatus === "connecting"
+              ? "bg-yellow-500/20 text-yellow-400"
+              : "bg-red-500/20 text-red-400"
+        }`}
+      >
+        {wsStatus === "connected"
+          ? "● Live"
+          : wsStatus === "connecting"
+            ? "● Connecting..."
+            : "● Disconnected"}
+      </div>
+
+      {/* active users */}
       <div className="absolute top-4 right-4 z-10 flex gap-2">
         {activeUsers.map((id) => (
           <div
@@ -221,6 +252,7 @@ export default function RoomPage({
         ))}
       </div>
 
+      {/* toolbar */}
       <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 bg-[#111111] border border-zinc-800 rounded-xl px-4 py-2 flex gap-3">
         <button
           onClick={() => setTool("rect")}
@@ -279,6 +311,12 @@ export default function RoomPage({
           Sign out
         </button>
       </div>
+
+      {isLoadingShapes && (
+        <div className="absolute inset-0 bg-[#1a1a2e] flex items-center justify-center z-20">
+          <p className="text-zinc-400 text-sm">Loading canvas...</p>
+        </div>
+      )}
 
       <canvas
         ref={canvasRef}
