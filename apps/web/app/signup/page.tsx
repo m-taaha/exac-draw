@@ -30,7 +30,10 @@ export default function SignupPage() {
         setError("");
 
         try {
-            const response = await axios.post("http://localhost:8000/api/v1/user/signup", form);
+            const response = await axios.post(
+              `${process.env.NEXT_PUBLIC_HTTP_URL}/api/v1/user/signup`,
+              form,
+            );
             if(!response) return;
 
             console.log("Response data:", response.data);

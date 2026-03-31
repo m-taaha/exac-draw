@@ -18,7 +18,7 @@ export default function Home() {
 
     try {
       const response = await axios.post(
-        "http://localhost:8000/api/v1/room/create/",
+        `${process.env.NEXT_PUBLIC_HTTP_URL}/api/v1/room/create/`,
         { slug },
         { withCredentials: true },
       );
@@ -38,7 +38,7 @@ export default function Home() {
   const joinRoomHandler = async () => {
      try {
        const res = await axios.get(
-         `http://localhost:8000/api/v1/room/slug/${joinSlug}`,
+         `${process.env.NEXT_PUBLIC_HTTP_URL}/api/v1/room/slug/${joinSlug}`,
          { withCredentials: true },
        );
        router.push(`/room/${res.data.roomId}`);

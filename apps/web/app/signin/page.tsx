@@ -27,9 +27,11 @@ export default function SigninPage() {
         setIsLoading(true);
         setError("")
         try{
-            const response = await axios.post("http://localhost:8000/api/v1/user/signin", 
-                form, 
-                {withCredentials: true});
+            const response = await axios.post(
+              `${process.env.NEXT_PUBLIC_HTTP_URL}/api/v1/user/signin`,
+              form,
+              { withCredentials: true },
+            );
             if(!response) return;
 
                console.log("Response data:", response.data);

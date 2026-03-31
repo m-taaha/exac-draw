@@ -36,7 +36,9 @@ export default function RoomPage({
 
 
   useEffect(() => {
-    const ws = new WebSocket(`ws://localhost:8080?roomId=${roomId}`);
+    const ws = new WebSocket(
+      `${process.env.NEXT_PUBLIC_WS_URL}?roomId=${roomId}`,
+    );
     ws.onopen = () => {
       console.log("WS connected");
       setWsStatus("connected");
@@ -80,7 +82,7 @@ export default function RoomPage({
 
       try {
         const res = await axios.get(
-          `http://localhost:8000/api/v1/room/${roomId}/shapes`,
+          `${process.env.NEXT_PUBLIC_HTTP_URL}/api/v1/room/${roomId}/shapes`,
           { withCredentials: true },
         );
         shapes.current = res.data.shapes;
@@ -300,7 +302,7 @@ export default function RoomPage({
         <button
           onClick={async () => {
             await axios.post(
-              "http://localhost:8000/api/v1/user/signout",
+              `${process.env.NEXT_PUBLIC_HTTP_URL}/api/v1/user/signout`,
               {},
               { withCredentials: true },
             );
