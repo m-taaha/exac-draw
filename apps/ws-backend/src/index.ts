@@ -28,34 +28,34 @@ const rooms = new Map<string, Set<WebSocket>>(); //this creaets a data structure
 
 wss.on("connection", async (ws: WebSocket, req: IncomingMessage) => {
   try {
-    const { query } = parse(req.url!, true);
-    const tokenFromQuery = query.token as string;
+   const { query } = parse(req.url!, true);
+   const tokenFromQuery = query.token as string;
+   const roomId = query.roomId as string;
 
-    const rawCookie = req.headers.cookie;
-    console.log("Raw Cookie Header:", rawCookie);
+   const rawCookie = req.headers.cookie;
+   const parsed = rawCookie ? cookie.parse(rawCookie) : {};
 
-    if (!rawCookie) {
-      console.log("No cookies found in headers");
-      return ws.close(1008, "No cookies");
-    }
+   // Logic: Use Cookie first, if missing use Query
+   const token = parsed.token || tokenFromQuery;
 
-    const parsed = cookie.parse(rawCookie);
-    const token = parsed.token || tokenFromQuery;
-    console.log("Extracted Token:", token ? "Token exists" : "Token missing");
-    if (!token) return ws.close(1008, "Token missing");
+   console.log("Connection debug:", {
+     hasCookie: !!rawCookie,
+     hasQueryToken: !!tokenFromQuery,
+   });
 
-
-    console.log("Using JWT_SECRET length:", JWT_SECRET.length);
+   if (!token) {
+     console.log("Auth Failed: No token found in cookies or query");
+     return ws.close(1008, "Token missing");
+   }
 
     const decode = jwt.verify(token, JWT_SECRET) as { userId: string };
     const userId = decode.userId;
     console.log("JWT Verified for User:", userId);
 
-    console.log("User connected:", userId);
 
     // {extract from room id}
     // parse the url and extract the query from it. then extract room id from the query
-    const roomId = query.roomId as string;
+
     if (!roomId) return ws.close();
 
     // this will check if the room has aleady this room id? if not then create it
