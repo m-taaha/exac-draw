@@ -1,6 +1,7 @@
 "use client";
 
 import axios from "axios";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, use } from "react";
 
 interface Shapes {
@@ -18,6 +19,8 @@ export default function RoomPage({
   params: Promise<{ roomId: string }>;
 }) {
   const { roomId } = use(params);
+  const router = useRouter();
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
   const isDrawing = useRef(false);
@@ -34,39 +37,62 @@ export default function RoomPage({
   const [wsStatus, setWsStatus] = useState<"connecting" | "connected" | "disconnected">("connecting"); //tracks the ws connection
   const [isLoadingShapes, setIsLoadingShapes] = useState(true);
 
-
+  // Auth check eefect
   useEffect(() => {
-    const ws = new WebSocket(
-      `${process.env.NEXT_PUBLIC_WS_URL}?roomId=${roomId}`,
-    );
-    ws.onopen = () => {
-      console.log("WS connected");
-      setWsStatus("connected");
+  const checkAuth = async () => {
+    try {
+      await axios.get(`${process.env.NEXT_PUBLIC_HTTP_URL}/api/v1/user/me`, {
+        withCredentials: true,
+      });
+    } catch (error) {
+      // If the backend says "Unauthorized", go to signin
+      router.push("/signin");
     }
-    ws.onclose = () => {
-      console.log("WS disconnected");
-      setWsStatus("disconnected")
-    }
-    ws.onmessage = (event) => {
-      const msg = JSON.parse(event.data);
-      if (msg.kind === "draw") {
-        shapes.current.push(msg.shape);
-        redrawCanvas();
-      } else if (msg.kind === "init") {
-        const initShapes = msg.messages.map(
-          (m: any) => JSON.parse(m.message).shape,
-        );
-        shapes.current = initShapes;
-        redrawCanvas();
-      } else if (msg.kind === "joined") {
-        setActiveUsers((prev) => [...prev, msg.userId]);
-      } else if (msg.kind === "left") {
-        setActiveUsers((prev) => prev.filter((id) => id !== msg.userId));
-      }
-    };
-    wsRef.current = ws;
-    return () => ws.close();
-  }, [roomId]);
+  };
+
+  checkAuth();
+}, [router]);
+
+
+ useEffect(() => {
+   const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+
+   // Clean up the URL: remove protocol from env and ensure fallback is just the domain
+   const wsBase =
+     process.env.NEXT_PUBLIC_WS_URL?.replace(/^https?:\/\//, "") ||
+     "ws-backend-cc7e.onrender.com";
+
+   const ws = new WebSocket(`${protocol}://${wsBase}?roomId=${roomId}`);
+
+   ws.onopen = () => {
+     console.log("WS connected");
+     setWsStatus("connected");
+   };
+   ws.onclose = () => {
+     console.log("WS disconnected");
+     setWsStatus("disconnected");
+   };
+   ws.onmessage = (event) => {
+     const msg = JSON.parse(event.data);
+     if (msg.kind === "draw") {
+       shapes.current.push(msg.shape);
+       redrawCanvas();
+     } else if (msg.kind === "init") {
+       const initShapes = msg.messages.map(
+         (m: any) => JSON.parse(m.message).shape,
+       );
+       shapes.current = initShapes;
+       redrawCanvas();
+     } else if (msg.kind === "joined") {
+       setActiveUsers((prev) => [...prev, msg.userId]);
+     } else if (msg.kind === "left") {
+       setActiveUsers((prev) => prev.filter((id) => id !== msg.userId));
+     }
+   };
+   wsRef.current = ws;
+   return () => ws.close();
+   // Fixed the typo here: changed };, to }
+ }, [roomId]);
 
   useEffect(() => {
     const canvas = canvasRef.current;

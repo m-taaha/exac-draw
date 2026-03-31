@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export function middleware(req: NextRequest) {
-  // Just pass through!
-  // Client-side checkAuth will handle protection.
+  // We are removing the token check here because Middleware
+  // cannot see cookies from a different domain (Render).
   return NextResponse.next();
 }
 
