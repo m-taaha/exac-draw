@@ -29,6 +29,9 @@ importers:
       '@repo/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../../packages/typescript-config
       bcryptjs:
         specifier: ^3.0.3
         version: 3.0.3
@@ -48,9 +51,6 @@ importers:
         specifier: ^9.0.3
         version: 9.0.3
     devDependencies:
-      '@repo/typescript-config':
-        specifier: workspace:*
-        version: link:../../packages/typescript-config
       '@types/bcryptjs':
         specifier: ^3.0.0
         version: 3.0.0
@@ -130,6 +130,9 @@ importers:
       '@repo/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../../packages/typescript-config
       '@types/jsonwebtoken':
         specifier: ^9.0.10
         version: 9.0.10
@@ -146,9 +149,6 @@ importers:
         specifier: ^8.20.0
         version: 8.20.0
     devDependencies:
-      '@repo/typescript-config':
-        specifier: workspace:*
-        version: link:../../packages/typescript-config
       '@types/cookie':
         specifier: ^1.0.0
         version: 1.0.0
