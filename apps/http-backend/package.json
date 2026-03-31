@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "cd ../.. && pnpm --filter @repo/db db:generate && pnpm --filter http-backend tsc -b",
+    "build": "cd ../.. && pnpm install && pnpm --filter @repo/db db:generate && tsc -b",
     "start": "node ./dist/index.js",
     "dev": "nodemon --watch src --ext ts --exec \"pnpm build && node ./dist/index.js\""
   },
