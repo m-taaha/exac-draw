@@ -7,7 +7,16 @@ import { parse } from "url";
 import { prisma } from "@repo/db";
 import { createServer } from "http";
 
-const server = createServer();
+
+
+// Change this line:
+const server = createServer((req, res) => {
+    // This handles standard HTTP requests (Health Checks)
+    res.writeHead(200);
+    res.end("WS Server is Healthy");
+});
+
+// The rest remains the same:
 const wss = new WebSocketServer({ server });
 
 const JWT_SECRET = process.env.JWT_SECRET_KEY;
