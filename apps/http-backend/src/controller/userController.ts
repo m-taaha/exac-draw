@@ -71,7 +71,7 @@ export const userSignUp = async (req: Request, res: Response) => {
   }
 };
 
-export const userSingnIn = async (req: Request, res: Response) => {
+export const userSignin = async (req: Request, res: Response) => {
   try {
     const result = SigninSchema.safeParse(req.body);
 
@@ -111,8 +111,8 @@ export const userSingnIn = async (req: Request, res: Response) => {
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      secure: true,
+      sameSite: "none",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
