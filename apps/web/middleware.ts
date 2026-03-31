@@ -7,9 +7,9 @@ export function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/signin", req.url));
   }
 
-  return NextResponse.next(); // ← just check existence, skip JWT verify
+  return NextResponse.next(); 
 }
 
 export const config = {
-  matcher: ["/dashboard", "/room/:path*"],
+  matcher: ["/room/:path*"],
 };

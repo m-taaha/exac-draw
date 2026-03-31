@@ -3,7 +3,7 @@
 import axios from "axios";
 import { useRouter } from "next/navigation";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function Home() {
   const router = useRouter();
@@ -11,6 +11,14 @@ export default function Home() {
   const [joinSlug, setJoinSlug] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+   useEffect(() => {
+     axios
+       .get(`${process.env.NEXT_PUBLIC_HTTP_URL}/api/v1/user/me`, {
+         withCredentials: true,
+       })
+       .catch(() => router.push("/signin"));
+   }, []);
 
   const createRoomHandler = async () => {
     setIsLoading(true);
