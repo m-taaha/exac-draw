@@ -5,12 +5,13 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc -b",
+    "build": "cd ../.. && pnpm --filter @repo/db db:generate && pnpm --filter http-backend tsc -b",
     "start": "node ./dist/index.js",
     "dev": "nodemon --watch src --ext ts --exec \"pnpm build && node ./dist/index.js\""
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
+    "@types/bcryptjs": "^3.0.0",
     "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
