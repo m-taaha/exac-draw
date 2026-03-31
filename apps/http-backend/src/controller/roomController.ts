@@ -78,3 +78,16 @@ export const getShapes = async (req: Request, res: Response) => {
    }
 
 }
+
+
+export const getRoomBySlug = async (req: Request, res: Response) => {
+    try {
+      const room = await prisma.room.findUnique({
+        where: { slug: req.params.slug as string },
+      });
+      if (!room) return res.status(404).json({ message: "Room not found" });
+      res.json({ roomId: room.id });
+    } catch (error) {
+      res.status(500).json({ message: "Internal Server Error" });
+    }
+}

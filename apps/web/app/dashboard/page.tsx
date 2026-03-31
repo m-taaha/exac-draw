@@ -36,7 +36,15 @@ export default function Home() {
   };
 
   const joinRoomHandler = async () => {
-    router.push(`/room/${joinSlug}`);
+     try {
+       const res = await axios.get(
+         `http://localhost:8000/api/v1/room/slug/${joinSlug}`,
+         { withCredentials: true },
+       );
+       router.push(`/room/${res.data.roomId}`);
+     } catch (err: any) {
+       setError(err.response?.data?.message || "Room not found");
+     }
   };
 
   return (
