@@ -1,3 +1,4 @@
+
 import "dotenv/config";
 import express from "express";
 import userRouter from "./routes/userRoutes.js";
@@ -7,14 +8,24 @@ import cors from "cors";
 
 const app = express();
 
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    origin: (origin, callback) => {
+      const allowed = [process.env.FRONTEND_URL, "http://localhost:3000"];
+      if (
+        !origin ||
+        allowed.some((o) => o && origin.startsWith(o)) ||
+        origin.endsWith(".vercel.app")
+      ) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   }),
 );
