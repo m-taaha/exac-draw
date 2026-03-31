@@ -34,6 +34,10 @@ export default function SigninPage() {
             );
             if(!response) return;
 
+            if (response.data.token) {
+              localStorage.setItem("token", response.data.token);
+            }
+
                console.log("Response data:", response.data);
                console.log("Status code:", response.status);
 

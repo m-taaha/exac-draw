@@ -28,6 +28,9 @@ const rooms = new Map<string, Set<WebSocket>>(); //this creaets a data structure
 
 wss.on("connection", async (ws: WebSocket, req: IncomingMessage) => {
   try {
+    const { query } = parse(req.url!, true);
+    const tokenFromQuery = query.token as string;
+
     const rawCookie = req.headers.cookie;
     console.log("Raw Cookie Header:", rawCookie);
 
@@ -37,7 +40,7 @@ wss.on("connection", async (ws: WebSocket, req: IncomingMessage) => {
     }
 
     const parsed = cookie.parse(rawCookie);
-    const token = parsed.token;
+    const token = parsed.token || tokenFromQuery;
     console.log("Extracted Token:", token ? "Token exists" : "Token missing");
     if (!token) return ws.close(1008, "Token missing");
 
@@ -52,7 +55,6 @@ wss.on("connection", async (ws: WebSocket, req: IncomingMessage) => {
 
     // {extract from room id}
     // parse the url and extract the query from it. then extract room id from the query
-    const { query } = parse(req.url!, true);
     const roomId = query.roomId as string;
     if (!roomId) return ws.close();
 
@@ -61,7 +63,7 @@ wss.on("connection", async (ws: WebSocket, req: IncomingMessage) => {
       rooms.set(roomId, new Set());
     }
 
-    const clients = rooms.get(roomId)!;
+    const clients = rooms.get(roomId)!; 
 
     clients.add(ws); //add the user to the room
 

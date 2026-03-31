@@ -62,7 +62,9 @@ export default function RoomPage({
      process.env.NEXT_PUBLIC_WS_URL?.replace(/^https?:\/\//, "") ||
      "ws-backend-cc7e.onrender.com";
 
-   const ws = new WebSocket(`${protocol}://${wsBase}?roomId=${roomId}`);
+     const token = localStorage.getItem("token");
+
+const ws = new WebSocket(`${protocol}://${wsBase}?roomId=${roomId}&token=${token}`);
 
    ws.onopen = () => {
      console.log("WS connected");
