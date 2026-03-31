@@ -29,14 +29,24 @@ const rooms = new Map<string, Set<WebSocket>>(); //this creaets a data structure
 wss.on("connection", async (ws: WebSocket, req: IncomingMessage) => {
   try {
     const rawCookie = req.headers.cookie;
-    if (!rawCookie) return ws.close();
+    console.log("Raw Cookie Header:", rawCookie);
+
+    if (!rawCookie) {
+      console.log("No cookies found in headers");
+      return ws.close(1008, "No cookies");
+    }
 
     const parsed = cookie.parse(rawCookie);
     const token = parsed.token;
-    if (!token) return ws.close();
+    console.log("Extracted Token:", token ? "Token exists" : "Token missing");
+    if (!token) return ws.close(1008, "Token missing");
+
+
+    console.log("Using JWT_SECRET length:", JWT_SECRET.length);
 
     const decode = jwt.verify(token, JWT_SECRET) as { userId: string };
     const userId = decode.userId;
+    console.log("JWT Verified for User:", userId);
 
     console.log("User connected:", userId);
 
@@ -124,7 +134,7 @@ wss.on("connection", async (ws: WebSocket, req: IncomingMessage) => {
   }
 });
 
-const PORT = process.env.PORT || 8080;
-server.listen(PORT, () => {
+const PORT = Number(process.env.PORT) || 8080;
+server.listen(PORT, "0.0.0.0", () => {
   console.log(`WebSocket Server is running on port ${PORT}`);
 });
