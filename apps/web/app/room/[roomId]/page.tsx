@@ -44,7 +44,12 @@ export default function RoomPage({params,}: {  params: Promise<{ roomId: string 
       if (msg.kind === "draw") {
         shapes.current.push(msg.shape);
         redrawCanvas();
-      } else if (msg.kind === "joined") {
+      } else if (msg.kind === "init") {
+        const initShapes = msg.messages.map((m:any) => JSON.parse(m.message).shape)
+        shapes.current = initShapes
+        redrawCanvas()
+      }
+       else if (msg.kind === "joined") {
         setActiveUsers((prev) => [...prev, msg.userId]);
       } else if (msg.kind === "left") {
         setActiveUsers((prev) => prev.filter((id) => id !== msg.userId));

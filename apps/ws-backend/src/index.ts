@@ -18,7 +18,7 @@ if (!JWT_SECRET) {
 
     const rooms = new Map<string, Set<WebSocket>>(); //this creaets a data structure to store rooms and users inside them 
 
-wss.on("connection", (ws: WebSocket, req: IncomingMessage) => {
+wss.on("connection", async (ws: WebSocket, req: IncomingMessage) => {
   try {
     const rawCookie = req.headers.cookie;
     if (!rawCookie) return ws.close();
@@ -31,6 +31,9 @@ wss.on("connection", (ws: WebSocket, req: IncomingMessage) => {
     const userId = decode.userId;
 
 
+    console.log("User connected:", userId);
+
+    // {extract from room id}
     // parse the url and extract the query from it. then extract room id from the query
     const {query} = parse(req.url!, true);
     const roomId = query.roomId as string;
@@ -42,41 +45,75 @@ wss.on("connection", (ws: WebSocket, req: IncomingMessage) => {
       rooms.set(roomId, new Set());
     }
 
-    rooms.get(roomId)!.add(ws); //add the user to the room
+    const clients = rooms.get(roomId)!;
 
+    clients.add(ws); //add the user to the room
 
-
-    console.log("User connected:", userId);
-
-    ws.on("message", async (data) => {
-          try {
-            console.log("Saving shape to DB:", data.toString()); 
-            await prisma.chat.create({
-              data: {
-                roomId: Number(roomId),
-                userId,
-                message: data.toString(),
-              },
-            });
-            console.log("Shape saved successfully"); 
-            
-          } catch (error) {
-            console.error("Failed to save shape:", error); 
-          }
-
-      rooms.get(roomId)?.forEach(client => {
-        // send the message to everyone in room but not the user itself because he created the message or generated
-        if(client !== ws && client.readyState === WebSocket.OPEN) {
-          client.send(data.toString());
-        }
+    // fetch previous state 
+      const previousMessages = await prisma.chat.findMany({
+        where: { roomId: Number(roomId) },
+        orderBy: { id: "asc" },
       });
-    });
+      // Send all previous drawings to new user
+      ws.send(
+        JSON.stringify({
+          kind: "init",
+          messages: previousMessages,
+        }),
+      );
+
+
+    clients.forEach((client) => {
+       if (client !== ws && client.readyState === WebSocket.OPEN) {
+         client.send(JSON.stringify({ kind: "joined", userId }));
+       }
+     });
+
+
+
+
+ ws.on("message", async (data) => {
+   let msg; 
+
+   try{
+     msg = JSON.parse(data.toString());
+      if (msg.kind === "draw") {
+     try {
+       await prisma.chat.create({
+         data: { roomId: Number(roomId), userId, message: data.toString() },
+       });
+     } catch (error) {
+       console.error("Failed to save shape:", error);
+     }
+
+     clients.forEach((client) => {
+       if (client !== ws && client.readyState === WebSocket.OPEN) {
+         client.send(data.toString());
+       }
+     });
+   }
+   } catch (error) {
+    return;
+   }
+ });
 
     ws.on("close", () => {
-      rooms.get(roomId)?.delete(ws);
+      clients.delete(ws);
       console.log("User disconnected:", userId);
+
+      clients.forEach((client) => {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify({ kind: "left", userId }));
+        }
+      });
+
+      // clean up empty rooms
+      if (clients.size === 0) {
+        rooms.delete(roomId);
+      }
     });
   } catch (error) {
+    console.log( "connection error:",error)
     ws.close();
   }
 });

@@ -64,9 +64,10 @@ export const getShapes = async (req: Request, res: Response) => {
         }
     })
 
-    const shapes = chats.map(
-        chat => JSON.parse(chat.message)
-    )
+    const shapes = chats.map( chat => {
+        const msg = JSON.parse(chat.message)
+        return msg.shape
+   })
 
     res.json({shapes})
    } catch(error) {
