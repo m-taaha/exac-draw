@@ -35,7 +35,7 @@ export default function SigninPage() {
                console.log("Response data:", response.data);
                console.log("Status code:", response.status);
 
-               router.push("/")
+               router.push("/dashboard")
 
         } catch (error: any) {
             setError(error.response?.data?.message || "Something went wrong!.")
